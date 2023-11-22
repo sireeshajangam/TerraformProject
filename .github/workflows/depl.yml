@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - siri
-      - main
 
 jobs:
   terraform-deploy:
@@ -42,17 +41,17 @@ jobs:
 
       - name: Terraform Validate
         run: |
-          cd Project/TerraformInfraCreation
+          cd TerraformInfrastructure
           terraform validate 
 
       - name: Terraform Plan
         run: |
-          cd Project/TerraformInfraCreation
+          cd TerraformInfrastructure
           terraform plan -var-file=environments/staging.tfvars
 
       - name: Terraform Apply
         run: |
-          cd Project/TerraformInfraCreation
+          cd TerraformInfrastructure
           terraform apply -auto-approve -var-file=environments/staging.tfvars
           
   build-and-push:
@@ -85,7 +84,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          cd Project/WebAppApplication
+          cd WebAppApplication
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 571888835380.dkr.ecr.us-east-1.amazonaws.com
           docker build -t python-repo .
           docker tag python-repo:latest 571888835380.dkr.ecr.us-east-1.amazonaws.com/python-repo:latest
