@@ -84,7 +84,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          cd WebAppApplication
+          cd Project/WebAppApplication
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 571888835380.dkr.ecr.us-east-1.amazonaws.com
           docker build -t python-repo .
           docker tag python-repo:latest 571888835380.dkr.ecr.us-east-1.amazonaws.com/python-repo:latest
