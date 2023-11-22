@@ -3,6 +3,7 @@ name: Terraform AWS Deployments and Docker Build/Push
 on:
   push:
     branches:
+      - siri
       - main
 
 jobs:
@@ -28,26 +29,34 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"  # Replace with your preferred region
 
-      # Remove the step for generating backend.tf if it already exists in your repository
-
       - name: Terraform Init 
-        run: terraform init 
+        run: |
+          cd Project/TerraformInfraCreation
+          terraform init 
 
       - name: Terraform Workspace - Create and Select
         run: |
+          cd Project/TerraformInfraCreation
           terraform workspace new Staging || true
           terraform workspace select Staging
 
       - name: Terraform Validate
-        run: terraform validate 
+        run: |
+          cd Project/TerraformInfraCreation
+          terraform validate 
 
       - name: Terraform Plan
-        run: terraform plan -var-file=environments/staging.tfvars
+        run: |
+          cd Project/TerraformInfraCreation
+          terraform plan -var-file=environments/staging.tfvars
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=environments/staging.tfvars
-
+        run: |
+          cd Project/TerraformInfraCreation
+          terraform apply -auto-approve -var-file=environments/staging.tfvars
+          
   build-and-push:
+    needs: terraform-deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -76,6 +85,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
+          cd Project/WebAppApplication
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 571888835380.dkr.ecr.us-east-1.amazonaws.com
           docker build -t python-repo .
           docker tag python-repo:latest 571888835380.dkr.ecr.us-east-1.amazonaws.com/python-repo:latest
