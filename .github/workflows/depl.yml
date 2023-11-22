@@ -35,7 +35,7 @@ jobs:
 
       - name: Terraform Workspace - Create and Select
         run: |
-          cd Project/TerraformInfraCreation
+          cd TerraformInfrastructure
           terraform workspace new Staging || true
           terraform workspace select Staging
 
