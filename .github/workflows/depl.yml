@@ -2,7 +2,7 @@ name: Terraform AWS Deployment and Docker Build/Push
 on:
   push:
     branches:
-      - main
+      - release
 
 env:
   TF_VERSION: "1.5.7"
