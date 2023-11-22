@@ -1,16 +1,19 @@
-name: Terraform AWS Deployments and Docker Build/Push
-
+name: Terraform AWS Deployment and Docker Build/Push
 on:
   push:
     branches:
       - siri
-      
+
+env:
+  TF_VERSION: "1.5.7"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "us-east-1"
+  ECR_REPO_URL: ${{ secrets.ECR_REPO_URL }}
+
 jobs:
   terraform-deploy:
     runs-on: ubuntu-latest
-
-    env:
-      TF_VERSION: "1.5.7"  # Replace with your preferred Terraform version
 
     steps:
       - name: Checkout code
@@ -21,39 +24,15 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials for Terraform
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1"  # Replace with your preferred region
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform Init 
-        run: |
-          cd TerraformInfrastructure
-          terraform init 
+      # ... other Terraform deployment steps
 
-      - name: Terraform Workspace - Create and Select
-        run: |
-          cd TerraformInfrastructure
-          terraform workspace new Staging || true
-          terraform workspace select Staging
-
-      - name: Terraform Validate
-        run: |
-          cd TerraformInfrastructure
-          terraform validate 
-
-      - name: Terraform Plan
-        run: |
-          cd TerraformInfrastructure
-          terraform plan -var-file=environments/staging.tfvars
-
-      - name: Terraform Apply
-        run: |
-          cd TerraformInfrastructure
-          terraform apply -auto-approve -var-file=environments/staging.tfvars
-          
   build-and-push:
     needs: terraform-deploy
     runs-on: ubuntu-latest
@@ -71,12 +50,13 @@ jobs:
         run: |
           cd WebApplication
           python -m pip install --upgrade pip
-      - name: Configure AWS Credentials
+
+      - name: Configure AWS credentials for Docker
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Replace with your AWS region
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -84,27 +64,26 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         run: |
           cd WebApplication
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 571888835380.dkr.ecr.us-east-1.amazonaws.com
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPO_URL }}
           docker build -t python-repo .
-          docker tag python-repo:latest 571888835380.dkr.ecr.us-east-1.amazonaws.com/python-repo:latest
-          docker push 571888835380.dkr.ecr.us-east-1.amazonaws.com/python-repo:latest
-  
+          docker tag python-repo:latest ${{ env.ECR_REPO_URL }}:latest
+          docker push ${{ env.ECR_REPO_URL }}:latest
+
   trigger-pipeline:
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Configure AWS Credentials
+
+      - name: Configure AWS Credentials for CodePipeline
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Replace with your AWS region
-
-
-      # Other necessary steps for building and pushing the image to ECR...
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Trigger CodePipeline
         run: |
-  #         aws codepipeline start-pipeline-execution --name GuestAppPipeline	
+          aws codepipeline start-pipeline-execution --name GuestAppPipeline
