@@ -1,4 +1,4 @@
-name: Terraform AWS Deployments and Docker Build/Push
+name: Terraform AWS Deployment and Docker Build/Push
 
 on:
   push:
