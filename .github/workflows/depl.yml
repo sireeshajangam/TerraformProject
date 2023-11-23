@@ -2,7 +2,7 @@ name: Terraform AWS Deployment and Docker Build/Push
 on:
   push:
     branches:
-      - release
+      - feature
 
 env:
   TF_VERSION: "1.5.7"
@@ -31,8 +31,34 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      - name: Terraform Init 
+        run: |
+          cd TerraformInfrastructure
+          terraform init 
 
-      # ... other Terraform deployment steps
+      - name: Terraform Workspace - Create and Select
+        run: |
+          cd TerraformInfrastructure
+          terraform workspace new Staging || true
+          terraform workspace select Staging
+
+      - name: Terraform Validate
+        run: |
+          cd TerraformInfrastructure
+          terraform validate 
+
+      - name: Terraform Plan
+        run: |
+          cd TerraformInfrastructure
+          terraform plan -var-file=environments/staging.tfvars
+
+      - name: Terraform Apply
+        run: |
+          cd TerraformInfrastructure
+          terraform apply -auto-approve -var-file=environments/staging.tfvars
+          
+
+      
 
   build-and-push:
     needs: terraform-deploy
