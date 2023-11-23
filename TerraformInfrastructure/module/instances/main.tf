@@ -34,7 +34,6 @@ resource "aws_instance" "example_instance" {
               # Install AWS CLI
               sudo apt-get install -y awscli
               EOF
-
   tags = {
     Name = "ExampleInstance-${count.index + 1}"
   }
