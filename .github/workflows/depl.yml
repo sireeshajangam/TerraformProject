@@ -40,8 +40,8 @@ jobs:
       - name: Terraform Workspace - Create and Select
         run: |
           cd TerraformInfrastructure
-          terraform workspace new staging || true
-          terraform workspace select staging
+          terraform workspace new dev || true
+          terraform workspace select dev
 
       - name: Terraform Validate
         run: |
@@ -51,11 +51,11 @@ jobs:
       - name: Terraform Plan
         run: |
           cd TerraformInfrastructure
-          terraform plan -var-file=environments/staging.tfvars
+          terraform plan -var-file=environments/dev.tfvars
       - name: Terraform apply
         run: |
           cd TerraformInfrastructure
-          terraform destroy -var-file=environments/staging.tfvars
+          terraform destroy -var-file=environments/dev.tfvars
       
   build-and-push:
     needs: terraform-deploy
