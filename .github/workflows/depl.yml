@@ -1,4 +1,4 @@
-name: Terraform AWS Deployments and Docker Build/Push
+name: Terraform AWS Deployment and Docker Build/Push
 on:
   push:
     branches:
@@ -15,8 +15,7 @@ env:
 jobs:
   terraform-deploy:
     runs-on: ubuntu-latest
-    outputs:
-      terraform-status: ${{ steps.set-terraform-status.outputs.status }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -40,8 +39,8 @@ jobs:
       - name: Terraform Workspace - Create and Select
         run: |
           cd TerraformInfrastructure
-          terraform workspace new staging || true
-          terraform workspace select staging
+          terraform workspace new Staging || true
+          terraform workspace select Staging
 
       - name: Terraform Validate
         run: |
@@ -52,14 +51,19 @@ jobs:
         run: |
           cd TerraformInfrastructure
           terraform plan -var-file=environments/staging.tfvars
-      - name: Terraform apply
+
+      - name: Terraform Delete
         run: |
           cd TerraformInfrastructure
-          terraform apply -var-file=environments/staging.tfvars
+          terraform delete -auto-approve -var-file=environments/staging.tfvars
+          
+
       
+
   build-and-push:
     needs: terraform-deploy
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -95,6 +99,7 @@ jobs:
   trigger-pipeline:
     needs: build-and-push
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
