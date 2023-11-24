@@ -8,18 +8,6 @@ resource "aws_s3_bucket" "mybucket" {
 }
 
 
-
-terraform {
-  backend "s3" {
-    bucket         = "aws_s3_bucket.mybucket.id"
-    key            = "terraform.tfstate"
-    region         = "us-east-1"
-    # dynamodb_table = "<your_dynamo_dbtable_name>"
-  }
-}
-
-
-
 module "network" {
   source                  = "./module/network"
   vpc_cidr_block          = "10.0.0.0/16"
