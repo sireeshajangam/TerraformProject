@@ -39,8 +39,8 @@ jobs:
       - name: Terraform Workspace - Create and Select
         run: |
           cd TerraformInfrastructure
-          terraform workspace new Staging || true
-          terraform workspace select Staging
+          terraform workspace new dev || true
+          terraform workspace select dev
 
       - name: Terraform Validate
         run: |
@@ -50,12 +50,12 @@ jobs:
       - name: Terraform Plan
         run: |
           cd TerraformInfrastructure
-          terraform plan -var-file=environments/staging.tfvars
+          terraform plan -var-file=environments/dev.tfvars
 
       - name: Terraform Destroy
         run: |
           cd TerraformInfrastructure
-          terraform destroy -auto-approve -var-file=environments/staging.tfvars
+          terraform destroy -auto-approve -var-file=environments/dev.tfvars
           
 
       
