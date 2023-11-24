@@ -1,10 +1,17 @@
-module "s3Creation" {
-  source = "./module/s3Creation"
+provider "aws" {
+  region = "us-east-1"
 }
+
+resource "aws_s3_bucket" "mybucket" {
+  bucket = "TerraformStatefileConfiguration33"
+  # Other bucket configurations...
+}
+
+
 
 terraform {
   backend "s3" {
-    bucket         = module.s3Creation.mybucketname
+    bucket         = "aws_s3_bucket.mybucket.id"
     key            = "terraform.tfstate"
     region         = "us-east-1"
     # dynamodb_table = "<your_dynamo_dbtable_name>"
