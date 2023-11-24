@@ -2,11 +2,14 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "mybucket" {
-  bucket = "TerraformStatefileConfiguration33"
-  # Other bucket configurations...
+terraform {
+  backend "s3" {
+    bucket         = "statefileterraform1"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    # dynamodb_table = "<your_dynamo_dbtable_name>"
+  }
 }
-
 
 module "network" {
   source                  = "./module/network"

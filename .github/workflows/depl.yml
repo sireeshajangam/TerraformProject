@@ -52,11 +52,10 @@ jobs:
           cd TerraformInfrastructure
           terraform plan -var-file=environments/dev.tfvars
 
-      - name: Terraform Apply
+      - name: Terraform Apply or Destroy
         run: |
           cd TerraformInfrastructure
-          terraform apply -auto-approve -var-file=environments/dev.tfvars
-          
+          terraform apply -auto-approve -var-file=environments/dev.tfvars > terraform_action.txt || echo "terraform destroy" > terraform_action.txt
 
       
 
@@ -64,6 +63,9 @@ jobs:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
+    if: ${{ contains(file('TerraformInfrastructure/terraform_action.txt'), 'terraform destroy') == false }}
+    
+      
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -111,6 +113,6 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Trigger CodePipeline
-        run: |
-          aws codepipeline start-pipeline-execution --name GuestAppPipeline
+      # - name: Trigger CodePipeline
+      #   run: |
+      #     aws codepipeline start-pipeline-execution --name GuestAppPipeline
