@@ -51,17 +51,17 @@ jobs:
         run: |
           cd TerraformInfrastructure
           terraform plan -var-file=environments/dev.tfvars
-
       - name: Terraform Apply or Destroy
         run: |
           cd TerraformInfrastructure
           terraform apply -auto-approve -var-file=environments/dev.tfvars > terraform_action.txt || echo "terraform destroy" > terraform_action.txt
-        env:
-          TERRAFORM_STATUS: ${{ steps.read_terraform_status.outputs.terraform_status }}
-      - name: Read Terraform Action
-        id: read_terraform_status
-        run: echo "::set-output name=terraform_status::$(cat TerraformInfrastructure/terraform_action.txt)"
 
+      
+      - name: Set Terraform Status
+        id: set_terraform_status
+        run: |
+          TERRAFORM_STATUS=$(cat TerraformInfrastructure/terraform_action.txt)
+          echo "TERRAFORM_STATUS=$TERRAFORM_STATUS" >> $GITHUB_ENV
 
       
 
@@ -69,7 +69,7 @@ jobs:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
-    if: ${{ env.TERRAFORM_STATUS != 'terraform destroy' }}
+    if: env.TERRAFORM_STATUS != 'terraform destroy'
     
       
     steps:
