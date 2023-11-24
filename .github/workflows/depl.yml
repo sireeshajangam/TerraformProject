@@ -63,7 +63,7 @@ jobs:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
-    if: ${{ contains(file('TerraformInfrastructure/terraform_action.txt'), 'terraform destroy') == false }}
+    if: ${{ contains(run:cat TerraformInfrastructure/terraform_action.txt, 'terraform destroy') }}
     
       
     steps:
