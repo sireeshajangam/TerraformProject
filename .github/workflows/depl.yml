@@ -52,10 +52,10 @@ jobs:
           cd TerraformInfrastructure
           terraform plan -var-file=environments/dev.tfvars
 
-      - name: Terraform Destroy
+      - name: Terraform Apply
         run: |
           cd TerraformInfrastructure
-          terraform destroy -auto-approve -var-file=environments/dev.tfvars
+          terraform apply -auto-approve -var-file=environments/dev.tfvars
           
 
       
