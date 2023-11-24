@@ -52,14 +52,11 @@ jobs:
           cd TerraformInfrastructure
           terraform plan -var-file=environments/staging.tfvars
 
-      - name: Terraform Apply
+      - name: Terraform destroy
         run: |
           cd TerraformInfrastructure
-          terraform apply -auto-approve -var-file=environments/staging.tfvars
+          terraform destroy -auto-approve -var-file=environments/staging.tfvars
           
-
-      
-
   build-and-push:
     needs: terraform-deploy
     runs-on: ubuntu-latest

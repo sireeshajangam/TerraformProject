@@ -13,6 +13,7 @@ resource "aws_instance" "example_instance" {
 
   key_name      = aws_key_pair.example_keypair.key_name
   vpc_security_group_ids = [var.ec2_sg_id]  # Use the security group IDs from variables
+  iam_instance_profile = "arn:aws:iam::571888835380:role/EC2CodeDeployRole"
 
   user_data = <<-EOF
               #!/bin/bash
