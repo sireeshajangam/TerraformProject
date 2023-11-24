@@ -55,7 +55,7 @@ jobs:
       - name: Terraform Delete
         run: |
           cd TerraformInfrastructure
-          terraform delete -auto-approve -var-file=environments/staging.tfvars
+          terraform destroy -auto-approve -var-file=environments/staging.tfvars
           
 
       
