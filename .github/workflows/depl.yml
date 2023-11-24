@@ -52,38 +52,14 @@ jobs:
         run: |
           cd TerraformInfrastructure
           terraform plan -var-file=environments/staging.tfvars
+      - name: Terraform apply
+        run: |
+          cd TerraformInfrastructure
+          terraform destroy -var-file=environments/staging.tfvars
       
-      - name: Apply Terraform Changes
-        if: always()
-        run: |
-          cd TerraformInfrastructure
-          terraform destroy
-
-
-      - name: Get Instance IP
-        id: instance-ip
-        if: always()
-        run: |
-          cd TerraformInfrastructure
-          ip_address=$(terraform output -json instance_ip | jq -r '.value')
-          echo "::set-output name=ip_address::$ip_address"
-
-      - name: Check Terraform Action
-        id: set-terraform-status
-        run: |
-          ip_address=${{ steps.instance-ip.outputs.ip_address }}
-          if [ -z "$ip_address" ]; then
-            echo "::set-output name=status::destroy"
-          else
-            echo "::set-output name=status::apply"
-          fi
-
-
   build-and-push:
     needs: terraform-deploy
     runs-on: ubuntu-latest
-
-    if: ${{ needs.terraform-deploy.outputs['terraform-status'] == 'apply' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -119,9 +95,6 @@ jobs:
   trigger-pipeline:
     needs: build-and-push
     runs-on: ubuntu-latest
-
-    if: ${{ needs.terraform-deploy.outputs['terraform-status'] == 'apply' }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
