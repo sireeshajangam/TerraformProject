@@ -3,7 +3,7 @@ module "s3Creation" {
 }
 terraform {
   backend "s3" {
-    bucket         = "s3Creation.mybucketname"
+    bucket         = "module.s3Creation.mybucketname"
     key            = "terraform.tfstate"
     region         = "us-east-1"
    # dynamodb_table = "<your_dynamo_dbtable_name>"
