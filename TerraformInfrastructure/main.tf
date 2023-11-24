@@ -1,14 +1,15 @@
-resource "aws_s3_bucket" "mybucket" {
-  bucket = "TerraformStatefileConfiguration33"
+module "s3Creation" {
+   source = "./module/s3Creation"
 }
 terraform {
   backend "s3" {
-    bucket         = "TerraformStatefileConfiguration33"
+    bucket         = "s3Creation.mybucketname"
     key            = "terraform.tfstate"
     region         = "us-east-1"
    # dynamodb_table = "<your_dynamo_dbtable_name>"
   }
 }
+
 
 module "network" {
   source                  = "./module/network"
