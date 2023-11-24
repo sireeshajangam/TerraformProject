@@ -54,7 +54,7 @@ jobs:
       - name: Terraform Apply or Destroy
         run: |
           cd TerraformInfrastructure
-          terraform destroy -auto-approve -var-file=environments/dev.tfvars > terraform_action.txt || echo "terraform destroy" > terraform_action.txt
+          terraform destroy -auto-approve -var-file=environments/dev.tfvars 
 
       
       # - name: Set Terraform Status
