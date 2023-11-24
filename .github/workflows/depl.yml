@@ -40,7 +40,7 @@ jobs:
       - name: Terraform Workspace - Create and Select
         run: |
           cd TerraformInfrastructure
-          terraform workspace new satging || true
+          terraform workspace new stging || true
           terraform workspace select staging
 
       - name: Terraform Validate
