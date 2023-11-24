@@ -57,7 +57,7 @@ jobs:
         if: always()
         run: |
           cd TerraformInfrastructure
-          terraform apply -auto-approve -var-file=environments/staging.tfvars
+          terraform destroy
 
 
       - name: Get Instance IP
