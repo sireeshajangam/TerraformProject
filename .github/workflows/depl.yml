@@ -15,7 +15,8 @@ env:
 jobs:
   terraform-deploy:
     runs-on: ubuntu-latest
-
+    outputs:
+      terraform-status: ${{ steps.set-terraform-status.outputs.status }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,8 +40,8 @@ jobs:
       - name: Terraform Workspace - Create and Select
         run: |
           cd TerraformInfrastructure
-          terraform workspace new dev || true
-          terraform workspace select dev
+          terraform workspace new staging || true
+          terraform workspace select staging
 
       - name: Terraform Validate
         run: |
@@ -50,28 +51,39 @@ jobs:
       - name: Terraform Plan
         run: |
           cd TerraformInfrastructure
-          terraform plan -var-file=environments/dev.tfvars
-      - name: Terraform Apply or Destroy
+          terraform plan -var-file=environments/staging.tfvars
+      
+      - name: Apply Terraform Changes
+        if: always()
         run: |
           cd TerraformInfrastructure
-          terraform destroy -auto-approve -var-file=environments/dev.tfvars 
+          terraform apply -auto-approve -var-file=environments/staging.tfvars
 
-      
-      # - name: Set Terraform Status
-      #   id: set_terraform_status
-      #   run: |
-      #     TERRAFORM_STATUS=$(cat TerraformInfrastructure/terraform_action.txt)
-      #     echo "::set-output name=terraform_status::$TERRAFORM_STATUS"
 
-      
+      - name: Get Instance IP
+        id: instance-ip
+        if: always()
+        run: |
+          cd TerraformInfrastructure
+          ip_address=$(terraform output -json instance_ip | jq -r '.value')
+          echo "::set-output name=ip_address::$ip_address"
+
+      - name: Check Terraform Action
+        id: set-terraform-status
+        run: |
+          ip_address=${{ steps.instance-ip.outputs.ip_address }}
+          if [ -z "$ip_address" ]; then
+            echo "::set-output name=status::destroy"
+          else
+            echo "::set-output name=status::apply"
+          fi
+
 
   build-and-push:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
-    # if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
-    
-      
+    if: ${{ needs.terraform-deploy.outputs['terraform-status'] == 'apply' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -108,7 +120,8 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
 
-    # if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
+    if: ${{ needs.terraform-deploy.outputs['terraform-status'] == 'apply' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
