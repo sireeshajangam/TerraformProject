@@ -57,11 +57,11 @@ jobs:
           terraform destroy -auto-approve -var-file=environments/dev.tfvars > terraform_action.txt || echo "terraform destroy" > terraform_action.txt
 
       
-      - name: Set Terraform Status
-        id: set_terraform_status
-        run: |
-          TERRAFORM_STATUS=$(cat TerraformInfrastructure/terraform_action.txt)
-          echo "::set-output name=terraform_status::$TERRAFORM_STATUS"
+      # - name: Set Terraform Status
+      #   id: set_terraform_status
+      #   run: |
+      #     TERRAFORM_STATUS=$(cat TerraformInfrastructure/terraform_action.txt)
+      #     echo "::set-output name=terraform_status::$TERRAFORM_STATUS"
 
       
 
@@ -69,7 +69,7 @@ jobs:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
-    if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
+    # if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
     
       
     steps:
@@ -108,7 +108,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
 
-    if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
+    # if: ${{ needs.terraform-deploy.outputs['terraform-status'] != 'terraform destroy' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
