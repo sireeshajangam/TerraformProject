@@ -1,6 +1,9 @@
+resource "aws_s3_bucket" "mybucket" {
+  bucket = "TerraformStatefileConfiguration33"
+}
 terraform {
   backend "s3" {
-    bucket         = "siri1234"
+    bucket         = "TerraformStatefileConfiguration33"
     key            = "terraform.tfstate"
     region         = "us-east-1"
    # dynamodb_table = "<your_dynamo_dbtable_name>"
