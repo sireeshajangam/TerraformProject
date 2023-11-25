@@ -28,6 +28,7 @@ jobs:
             echo "::set-output name=changes::$changes"
           else
             echo "No changes detected in WebApplication"
+            echo "::set-output name=changes::" # Ensure the output is set to an empty string
           fi
   build-and-push:
     runs-on: ubuntu-latest
