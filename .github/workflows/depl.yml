@@ -85,12 +85,13 @@ jobs:
       - name: Terraform Plan
         run: |
           cd TerraformInfrastructure
-          terraform plan -var-file=environments/staging.tfvars
+          terraform plan -lock=false -var-file=environments/staging.tfvars
 
-      - name: Terraform Apply
+
+      - name: Terraform Destroy
         run: |
           cd TerraformInfrastructure
-          terraform apply -auto-approve -var-file=environments/staging.tfvars
+          terraform destroy -auto-approve -var-file=environments/staging.tfvars
    trigger-pipeline:
     needs: terraform-deploy
     runs-on: ubuntu-latest
