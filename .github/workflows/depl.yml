@@ -3,14 +3,12 @@ on:
   push:
     branches:
       - feature
-
 env:
   TF_VERSION: "1.5.7"
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPO_URL: ${{ secrets.ECR_REPO_URL }}
-
 
 jobs:
   check-changes:
@@ -25,10 +23,15 @@ jobs:
         id: check_changes
         run: |
           changes=$(git diff --name-only origin/feature...origin/feature -- WebApplication/)
-          echo "::set-output name=changes::$changes"
+          if [ -n "$changes" ]; then
+            echo "Changes detected in WebApplication"
+            echo "::set-output name=changes::$changes"
+          else
+            echo "No changes detected in WebApplication"
+          fi
   build-and-push:
     runs-on: ubuntu-latest
-    if: ${{ needs.check-changes.outputs.changes != '' }} 
+    if: ${{ needs.check-changes.outputs.changes-detected != '' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -63,6 +66,7 @@ jobs:
   terraform-deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
+    if: ${{ needs.check-changes.outputs.changes-detected != '' }}
     
 
     steps:
