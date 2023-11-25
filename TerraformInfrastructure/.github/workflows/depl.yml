@@ -3,7 +3,7 @@ name: Terraform AWS Deployments
 on:
   push:
     branches:
-      - siri
+      - feature
 
 jobs:
   deploy:
