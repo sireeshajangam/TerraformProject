@@ -26,15 +26,13 @@ jobs:
           if [ -n "$changes" ]; then
             echo "Changes detected in WebApplication"
             echo "::set-output name=changes::$changes"
-            echo "true" > changes-detected.txt
           else
             echo "No changes detected in WebApplication"
             echo "::set-output name=changes::" # Ensure the output is set to an empty string
-            echo "false" > changes-detected.txt
           fi
   build-and-push:
     runs-on: ubuntu-latest
-    if: ${{ needs.check-changes.outputs.changes-detected != '' && needs.check-changes.outputs.changes-detected != 'false' }}
+    if: ${{ needs.check-changes.outputs.changes != '' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -115,8 +113,7 @@ jobs:
   trigger-pipeline:
     needs: terraform-deploy
     runs-on: ubuntu-latest
-    if: ${{ needs.check-changes.outputs.changes-detected != '' && needs.check-changes.outputs.changes-detected != 'false' }}
-
+    if: ${{ needs.check-changes.outputs.changes != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
