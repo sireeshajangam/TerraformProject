@@ -25,14 +25,14 @@ jobs:
           changes=$(git diff --name-only origin/feature...origin/feature -- WebApplication/)
           if [ -n "$changes" ]; then
             echo "Changes detected in WebApplication"
-            echo "::set-output name=changes::$changes"
+            echo "CHANGES_FOUND=true" >> $GITHUB_ENV
           else
             echo "No changes detected in WebApplication"
-            echo "::set-output name=changes::" # Ensure the output is set to an empty string
+            echo "CHANGES_FOUND=false" >> $GITHUB_ENV
           fi
   build-and-push:
     runs-on: ubuntu-latest
-    if: ${{ needs.check-changes.outputs.changes-detected != '' }}
+    if: env.CHANGES_FOUND == 'true'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -67,7 +67,6 @@ jobs:
   terraform-deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: ${{ needs.check-changes.outputs.changes-detected != '' }}
     
 
     steps:
@@ -114,6 +113,7 @@ jobs:
   trigger-pipeline:
     needs: terraform-deploy
     runs-on: ubuntu-latest
+    if: env.CHANGES_FOUND == 'true'
 
     steps:
       - name: Checkout code
