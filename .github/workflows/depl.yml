@@ -1,9 +1,9 @@
-name: Terraform AWS Deployments 
+name: Terraform AWS Deployment
 
 on:
   push:
     branches:
-      - siri
+      - feature
 
 jobs:
   deploy:
@@ -31,18 +31,28 @@ jobs:
       # Remove the step for generating backend.tf if it already exists in your repository
 
       - name: Terraform Init 
-        run: terraform init 
+        run: |
+          cd TerraformInfrastructure
+          terraform init 
 
       - name: Terraform Workspace - Create and Select
         run: |
+          cd TerraformInfrastructure
           terraform workspace new Staging || true
           terraform workspace select Staging
 
       - name: Terraform Validate
-        run: terraform validate 
+        run: |
+          cd TerraformInfrastructure
+          terraform validate 
 
       - name: Terraform Plan
-        run: terraform plan -var-file=environments/staging.tfvars
+        run: |
+          cd TerraformInfrastructure
+          terraform plan -var-file=environments/staging.tfvars
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file=environments/staging.tfvars
+      - name: Terraform Destroy
+        run: |
+          cd TerraformInfrastructure
+          terraform destroy -auto-approve -var-file=environments/staging.tfvars
+          
