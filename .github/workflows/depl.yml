@@ -28,7 +28,7 @@ jobs:
           echo "::set-output name=changes::$changes"
   build-and-push:
     runs-on: ubuntu-latest
-    
+    if: ${{ needs.check-changes.outputs.changes != '' }} 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
