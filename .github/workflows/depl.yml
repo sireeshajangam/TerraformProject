@@ -24,7 +24,7 @@ jobs:
       - name: Check for changes in WebApplication
         id: check_changes
         run: |
-          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- WebApplication/)
+          changes=$(git diff --name-only origin/main...origin/feature -- WebApplication/)
           echo "::set-output name=changes::$changes"
   build-and-push:
     runs-on: ubuntu-latest
