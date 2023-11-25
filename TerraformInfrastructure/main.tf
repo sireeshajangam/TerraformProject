@@ -7,7 +7,7 @@ terraform {
     bucket         = "statefileterraform1"
     key            = "terraform.tfstate"
     region         = "us-east-1"
-    # dynamodb_table = "<your_dynamo_dbtable_name>"
+    dynamodb_table = "TerrfaormStateLockingTable"
   }
 }
 
