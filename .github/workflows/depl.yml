@@ -13,9 +13,22 @@ env:
 
 
 jobs:
-   build-and-push:
+  check-changes:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.event_path == 'WebApplication/**' }
+    outputs:
+      changes-detected: ${{ steps.check_changes.outputs.changes }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Check for changes in WebApplication
+        id: check_changes
+        run: |
+          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- WebApplication/)
+          echo "::set-output name=changes::$changes"
+  build-and-push:
+    runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -47,7 +60,7 @@ jobs:
           docker build -t python-repo .
           docker tag python-repo:latest ${{ env.ECR_REPO_URL }}:latest
           docker push ${{ env.ECR_REPO_URL }}:latest
-   terraform-deploy:
+  terraform-deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     
@@ -93,7 +106,7 @@ jobs:
         run: |
           cd TerraformInfrastructure
           terraform destroy -auto-approve -var-file=environments/staging.tfvars
-   trigger-pipeline:
+  trigger-pipeline:
     needs: terraform-deploy
     runs-on: ubuntu-latest
 
