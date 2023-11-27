@@ -6,7 +6,7 @@ resource "aws_key_pair" "example_keypair" {
 
 # Create EC2 instances associated with the key pair
 resource "aws_instance" "example_instance" {
-  count         = 2
+  count         = 1
   ami           = "ami-0fc5d935ebf8bc3bc"  # Replace with your desired Ubuntu AMI ID
   instance_type = "t2.micro"
   subnet_id     = element(var.public_subnet_ids, count.index)  # Dynamically select subnet IDs
