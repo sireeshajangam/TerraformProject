@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    environment {
+        TF_VERSION = "1.5.7"  // Replace with your preferred Terraform version
+        AWS_REGION = "us-east-1"  // Replace with your preferred region
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Set up Terraform') {
+            steps {
+                script {
+                    def tfHome = tool name: 'Terraform', type: 'hudson.plugins.terraform.TerraformTool$DescriptorImpl'
+                    env.PATH = "${tfHome}/bin:${env.PATH}"
+                }
+            }
+        }
+
+        stage('Configure AWS credentials') {
+            steps {
+                withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                                 string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh """
+                        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                        aws configure set region $AWS_REGION
+                    """
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                script {
+                    dir('TerraformInfrastructure') {
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Workspace - Create and Select') {
+            steps {
+                script {
+                    dir('TerraformInfrastructure') {
+                        sh 'terraform workspace new Staging || true'
+                        sh 'terraform workspace select Staging'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                script {
+                    dir('TerraformInfrastructure') {
+                        sh 'terraform validate'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    dir('TerraformInfrastructure') {
+                        sh 'terraform plan -var-file=environments/staging.tfvars'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    dir('TerraformInfrastructure') {
+                        sh 'terraform apply -auto-approve -var-file=environments/staging.tfvars'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up steps, if needed
+        }
+    }
+}
